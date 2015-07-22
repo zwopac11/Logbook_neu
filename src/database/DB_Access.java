@@ -41,12 +41,12 @@ public class DB_Access {
         Connection conn = connPool.getConnection();
         Statement stat = conn.createStatement();
         String sqlString = "SELECT * "
-                           + "FROM address;";
+                + "FROM address;";
         //String sqlString = "SELECT * FROM books;";
         ResultSet rs = stat.executeQuery(sqlString);
-        
+
         System.out.println(rs);
-        
+
         while (rs.next()) {
             String title = rs.getString("title");
             String description = rs.getString("description");
@@ -69,8 +69,8 @@ public class DB_Access {
         Connection conn = connPool.getConnection();
         Statement stat = conn.createStatement();
         String sqlString = "SELECT DISTINCT category "
-                            + "FROM film_list "
-                            + "ORDER BY category;";
+                + "FROM film_list "
+                + "ORDER BY category;";
         ResultSet rs = stat.executeQuery(sqlString);
         LinkedList<String> categories = new LinkedList<>();
         while (rs.next()) {
@@ -82,72 +82,29 @@ public class DB_Access {
         return categories;
     }
 
-//    public LinkedList getFilmByName(String film, String schauspieler, String genre) throws Exception {
-//        //filme.clear();
-//        Connection conn = connPool.getConnection();
-//        Statement stat = conn.createStatement();
-//        if (film == null) {
-//            film = "";
-//        }
-//        if (schauspieler == null) {
-//            schauspieler = "";
-//        }
-//        if (genre == null) {
-//            genre = "";
-//        }
-//        
-//        String sqlString = "SELECT * "
-//                            + "FROM film_list "
-//                            + "WHERE title LIKE upper('%" + film + "%') AND actors LIKE upper('%" + schauspieler + "%') AND category LIKE '%" + genre + "%';";
-//        ResultSet rs = stat.executeQuery(sqlString);
-//        while (rs.next()) {
-//            String title = rs.getString("title");
-//            String description = rs.getString("description");
-//            String category = rs.getString("category");
-//            int length = Integer.parseInt(rs.getString("length"));
-//            String actors = rs.getString("actors");
-//            double price = Double.parseDouble(rs.getString("price"));
-//            //System.out.println(title+" : "+description+" : "+category+" : "+length+" : "+actors);
-//            Film film2 = new Film(title, description, category, length, actors,price);
-//            //System.out.println(filme.size());
-//            filme.add(film2);
-//        }
-//        connPool.relaseConnection(conn);
-//        return filme;
-//    }
-    
-    
-    
-    
-            public boolean upload_to_Database()
-        {
-         
-            
-            
-            
-            return false;
-        }
-            
-             public void readFile() throws FileNotFoundException, IOException {
+    public boolean upload_to_Database() {
+
+        return false;
+    }
+
+    public void readFile() throws FileNotFoundException, IOException {
 
         File file = new File(System.getProperty("user.dir") + File.separator + "src" + File.separator + "data" + File.separator + "termine.svg");
-        
+
         FileReader fr = new FileReader(file);
         BufferedReader br = new BufferedReader(fr);
         String zeile = "";
-        
-        while( (zeile = br.readLine()) != null )
-        {
-             String [] str = zeile.split(";");
+
+        while ((zeile = br.readLine()) != null) {
+            String[] str = zeile.split(";");
 //             Termin termin = new Termin(Integer.parseInt(str[0]), Integer.parseInt(str[1]), Integer.parseInt(str[2]), str[3], str[4], str[5]);
 //             termine.add(termin);
         }
-         br.close();
+        br.close();
     }
 
     public void setSpeed(double speed) {
         this.speed = speed;
     }
-            
-            
+
 }
