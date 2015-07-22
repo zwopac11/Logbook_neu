@@ -25,6 +25,7 @@ public class DB_Access {
     //private LinkedList<Film> filme = new LinkedList<>();
     private static DB_Access theInstance = null;
     private double speed;
+    private boolean updateing;
 
     private DB_Access() throws ClassNotFoundException {
         connPool = DB_ConnectionPool.getInstance();
@@ -65,26 +66,9 @@ public class DB_Access {
         //return filme;
     }
 
-    public LinkedList getCategories() throws Exception {
-        Connection conn = connPool.getConnection();
-        Statement stat = conn.createStatement();
-        String sqlString = "SELECT DISTINCT category "
-                + "FROM film_list "
-                + "ORDER BY category;";
-        ResultSet rs = stat.executeQuery(sqlString);
-        LinkedList<String> categories = new LinkedList<>();
-        while (rs.next()) {
-            String category = rs.getString("category");
-            categories.add(category);
-        }
-        connPool.relaseConnection(conn);
-
-        return categories;
-    }
-
-    public boolean upload_to_Database() {
-
-        return false;
+    public void upload_to_Database() {
+        updateing = true;
+ 
     }
 
     public void readFile() throws FileNotFoundException, IOException {
@@ -107,4 +91,9 @@ public class DB_Access {
         this.speed = speed;
     }
 
+    public boolean getUpdateing() {
+        return updateing;
+    }
+ 
+    
 }

@@ -249,10 +249,10 @@ public class GpsdTestApp {
                 }
 
                 dba.setSpeed(tpv.getSpeed());
-
+                updateing = dba.getUpdateing();
+                
                 if (tpv.getSpeed() >= 100 && updateing == false) {
-                    updateing = true;
-                    updateing = dba.upload_to_Database();
+                    dba.upload_to_Database();
                 }
             }
         });
