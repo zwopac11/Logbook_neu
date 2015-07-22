@@ -1,0 +1,6 @@
+Integriertes gpsd4java Projekt:
+http://taimos.github.io/GPSd4Java/
+
+War notwendig, da gpsd erst JSON formtaierte GPS-Angaben sendet wenn dies mit dem Befehl:
+			gpsEndPoint.voidCommand("?WATCH={\"enable\":true,\"json\":true};\"");
+gestartet wird.
