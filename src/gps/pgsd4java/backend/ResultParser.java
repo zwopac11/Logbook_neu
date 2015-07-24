@@ -105,7 +105,8 @@ public class ResultParser extends AbstractResultParser {
 			gps = this.parseHEALTH2(json);
 		} else if (json.has("WNlsf")) { // IONOObject
 			gps = this.parseIONO(json);
-		} else {
+		}else {
+                    System.out.println(clazz);
 			throw new ParseException("Invalid object class: " + clazz);
 		}
 		return gps;

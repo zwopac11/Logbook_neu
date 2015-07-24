@@ -14,6 +14,6 @@ public interface DB_Config {
     public static final String DB_NAME = "logbooksql1";
     public static final String DB_USER = "root";
     public static final String DB_PASSWD = "";
-    public static final String DB_URL = "jdbc:mysql://localhost:3306/";
+    public static final String DB_URL = "jdbc:mysql://192.168.178.44:3306/";
     public static final String DB_DRIVER = "com.mysql.jdbc.Driver";
 }

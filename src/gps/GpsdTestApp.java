@@ -41,6 +41,7 @@ import com.jgoodies.forms.layout.FormLayout;
 import database.DB_Access;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.InputStream;
@@ -75,7 +76,7 @@ public class GpsdTestApp {
     private JTextField txtAltitude;
     private JTextField txtSpeed;
 
-    private DB_Access dba;
+    //private DB_Access dba;
     private boolean updateing;
 
     private double latOld = -1, latNew = -1, lonOld = -1, lonNew = -1, d = 0;
@@ -93,7 +94,7 @@ public class GpsdTestApp {
 
     private void buildComponents() {
         txtServerAdress = new JTextField();
-        txtServerAdress.setText("192.168.1.107");
+        txtServerAdress.setText("192.168.178.44");//192.168.1.107 //127.0.0.1
         txtServerPort = new JTextField();
         txtServerPort.setText("2947");
         txtLatitude = new JTextField();
@@ -107,15 +108,15 @@ public class GpsdTestApp {
 
     private void createUI() {
 
-        try {
-            dba = DB_Access.getInstance();
-
-            // dba.getFilm();
-        } catch (ClassNotFoundException ex) {
-            System.out.println(ex.toString());
-        } catch (Exception ex) {
-            System.out.println(ex.toString());
-        }
+//        try {
+//            dba = DB_Access.getInstance();
+//
+//            // dba.getFilm();
+//        } catch (ClassNotFoundException ex) {
+//            System.out.println(ex.toString());
+//        } catch (Exception ex) {
+//            System.out.println(ex.toString());
+//        }
 
         buildComponents();
         initEventHandling();
@@ -206,7 +207,7 @@ public class GpsdTestApp {
                 latNew = tpv.getLatitude();
                 lonNew = tpv.getLongitude();
 
-                System.out.println(tpv.getTimestamp() + "afadfasdfasLongitude: " + tpv.getLatitude() + "Latitude: " + tpv.getLongitude());
+                //System.out.println(tpv.getTimestamp() + "afadfasdfasLongitude: " + tpv.getLatitude() + "Latitude: " + tpv.getLongitude());
 
 ////                            //upload auf Fileservver    
 ////                            try {
@@ -238,9 +239,13 @@ public class GpsdTestApp {
                         * Math.sin(dLon / 2) * Math.sin(dLon / 2);
                 double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
                 d = d + (R * c);
-                System.out.println(d);
+                //System.out.println(d);
 
                 try {
+                    //SimpleDateFormat sdf = new SimpleDateFormat();
+                    //String help =Double.parseDouble(tpv.getTimestamp());
+                    //sdf.format()
+                    System.out.println(tpv.getTimestamp());
                     writeFile(tpv.getTimestamp(), tpv.getLatitude(), tpv.getLongitude(), d);
                 } catch (ParseException ex) {
                     Logger.getLogger(GpsdTestApp.class.getName()).log(Level.SEVERE, null, ex);
@@ -248,12 +253,12 @@ public class GpsdTestApp {
                     Logger.getLogger(GpsdTestApp.class.getName()).log(Level.SEVERE, null, ex);
                 }
 
-                dba.setSpeed(tpv.getSpeed());
-                updateing = dba.getUpdateing();
+                //dba.setSpeed(tpv.getSpeed());
+                //updateing = dba.getUpdateing();
                 
-                if (tpv.getSpeed() >= 100 && updateing == false) {
-                    dba.upload_to_Database();
-                }
+//                if (tpv.getSpeed() >= 100 && updateing == false) {
+//                    dba.upload_to_Database();
+//                }
             }
         });
 
@@ -288,11 +293,42 @@ public class GpsdTestApp {
     }
 
     public void writeFile(double timestamp, double latitude, double longitude, double drivenKM) throws ParseException, IOException {
-        File file = new File(System.getProperty("user.dir") + File.separator + "src" + File.separator + "data" + File.separator + "save.csv");
-        FileOutputStream fos = null;
+        //File file = new File(System.getProperty("user.dir") + File.separator + "src" + File.separator + "data" + File.separator + "save.csv");
+        String dateiname = System.getProperty("wohin");
+        if (dateiname == null) {
+          dateiname = "save.csv";
+        }
+        File file = new File(dateiname);
+        //dba.setDateiname(dateiname);
+        
+            if (file.exists()) {
+      System.out.println("Datei existiert!!!!!!!!");
+      FileOutputStream fos = null;
         FileWriter fw = new FileWriter(file, true);
-        fw.write(timestamp + ";" + latitude + ";" + longitude + ";" + drivenKM);
+        fw.write(timestamp + ";" + latitude + ";" + longitude + ";" + drivenKM+ System.getProperty("line.separator"));
         fw.close();
+    } else {
+      try {
+        FileOutputStream fos = new FileOutputStream(file);
+        fos.write("".getBytes());
+        fos.close();
+        
+        FileWriter fw = new FileWriter(file, true);
+        fw.write(timestamp + ";" + latitude + ";" + longitude + ";" + drivenKM+ System.getProperty("line.separator"));
+        fw.close();
+      } catch (FileNotFoundException e) {
+        e.printStackTrace();
+      } catch (IOException e) {
+        e.printStackTrace();
+      }
+
+    }
+
+        
+//        FileOutputStream fos = null;
+//        FileWriter fw = new FileWriter(file, true);
+//        fw.write(timestamp + ";" + latitude + ";" + longitude + ";" + drivenKM+"\n");
+//        fw.close();
     }
 
     private void stopGpsdClient() {

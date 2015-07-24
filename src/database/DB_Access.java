@@ -26,6 +26,7 @@ public class DB_Access {
     private static DB_Access theInstance = null;
     private double speed;
     private boolean updateing;
+    private String dateiname;
 
     private DB_Access() throws ClassNotFoundException {
         connPool = DB_ConnectionPool.getInstance();
@@ -73,7 +74,7 @@ public class DB_Access {
 
     public void readFile() throws FileNotFoundException, IOException {
 
-        File file = new File(System.getProperty("user.dir") + File.separator + "src" + File.separator + "data" + File.separator + "termine.svg");
+        File file = new File(System.getProperty("user.dir")+ File.separator + "termine.svg");//+ File.separator + "src" + File.separator + "data" +
 
         FileReader fr = new FileReader(file);
         BufferedReader br = new BufferedReader(fr);
@@ -93,6 +94,10 @@ public class DB_Access {
 
     public boolean getUpdateing() {
         return updateing;
+    }
+
+    public void setDateiname(String dateiname) {
+        this.dateiname = dateiname;
     }
  
     
