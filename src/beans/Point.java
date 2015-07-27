@@ -12,8 +12,17 @@ import java.util.Date;
  * @author Claudio
  */
 public class Point {
+
     Double longitude, latitude, acceleration, distance;
     Date timestamp;
+
+    public Point(Date timestamp, Double latitude, Double longitude, Double distance, Double acceleration) {
+        this.longitude = longitude;
+        this.latitude = latitude;
+        this.acceleration = acceleration;
+        this.timestamp = timestamp;
+        this.distance = distance;
+    }
 
     public Double getLongitude() {
         return longitude;
@@ -47,15 +56,4 @@ public class Point {
         this.timestamp = timestamp;
     }
 
-    public Point(Date timestamp, Double latitude, Double longitude, Double distance, Double acceleration) {
-        this.longitude = longitude;
-        this.latitude = latitude;
-        this.acceleration = acceleration;
-        this.timestamp = timestamp;
-        this.distance = distance;
-    }
-    
-    
-    
-    
 }

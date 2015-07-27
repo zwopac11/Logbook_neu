@@ -245,8 +245,10 @@ public class GpsdTestApp {
 
                 dba.setSpeed(tpv.getSpeed());
                 updateing = dba.getUpdateing();
-                
-                if (tpv.getSpeed() >= 100 && updateing == false) {
+                System.out.println("tpv.getSpeed(): "+tpv.getSpeed()+" false: "+false);
+                //dba.upload_to_Database();
+                if (tpv.getSpeed() <= 100 && updateing == false) {
+                    System.out.println("hallo");
                     dba.upload_to_Database();
                 }
             }
