@@ -44,8 +44,8 @@ public class DB_Access {
     public void addPoint() throws Exception {
         Connection conn = connPool.getConnection();
         Statement stat = conn.createStatement();
-        String sqlString = "SELECT * "
-                + "FROM address;";
+        String sqlString =  "INSERT INTO point " +
+                            "VALUES "+;
         //String sqlString = "SELECT * FROM books;";
         ResultSet rs = stat.executeQuery(sqlString);
 
