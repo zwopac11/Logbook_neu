@@ -236,7 +236,7 @@ public class GpsdTestApp {
                     //String help =Double.parseDouble(tpv.getTimestamp());
                     //sdf.format()
                     System.out.println(tpv.getTimestamp());
-                    writeFile(tpv.getTimestamp(), tpv.getLatitude(), tpv.getLongitude(), d);
+                    writeFile(tpv.getTimestamp(), tpv.getLatitude(), tpv.getLongitude(),tpv.getSpeed(), d);
                 } catch (ParseException ex) {
                     Logger.getLogger(GpsdTestApp.class.getName()).log(Level.SEVERE, null, ex);
                 } catch (IOException ex) {
@@ -282,7 +282,7 @@ public class GpsdTestApp {
         fis.close();
     }
 
-    public void writeFile(double timestamp, double latitude, double longitude, double drivenKM) throws ParseException, IOException {
+    public void writeFile(double timestamp, double latitude, double longitude, double speed, double drivenKM) throws ParseException, IOException {
         //File file = new File(System.getProperty("user.dir") + File.separator + "src" + File.separator + "data" + File.separator + "save.csv");
         String dateiname = System.getProperty("wohin");
         if (dateiname == null) {
@@ -295,7 +295,7 @@ public class GpsdTestApp {
       System.out.println("Datei existiert!!!!!!!!");
       FileOutputStream fos = null;
         FileWriter fw = new FileWriter(file, true);
-        fw.write(timestamp + ";" + latitude + ";" + longitude + ";" + drivenKM+ System.getProperty("line.separator"));
+        fw.write(timestamp + ";" + latitude + ";" + longitude + ";" + speed + ";" + drivenKM+ System.getProperty("line.separator"));
         fw.close();
     } else {
       try {
