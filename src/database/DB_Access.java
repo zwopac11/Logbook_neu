@@ -14,9 +14,12 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;
+import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.LinkedList;
+import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -30,7 +33,7 @@ public class DB_Access {
     //private LinkedList<Film> filme = new LinkedList<>();
     private static DB_Access theInstance = null;
     private double speed;
-    private boolean updateing;
+    private boolean updateing = false;
     private String dateiname;
 
     private DB_Access() throws ClassNotFoundException {
@@ -65,12 +68,14 @@ public class DB_Access {
             readFile();
         } catch (IOException ex) {
             Logger.getLogger(DB_Access.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (ParseException ex) {
+            Logger.getLogger(DB_Access.class.getName()).log(Level.SEVERE, null, ex);
         }
-        //Thread upThread = new Thread("upThread");
-        
+        Thread upThread = new Thread("upThread");
+        updateing= false;
     }
 
-    public void readFile() throws FileNotFoundException, IOException {
+    public void readFile() throws FileNotFoundException, IOException, ParseException {
 
         File file = new File(dateiname);//+ File.separator + "src" + File.separator + "data" +
 
@@ -81,9 +86,16 @@ public class DB_Access {
 
         while ((zeile = br.readLine()) != null) {
             String[] str = zeile.split(";");
-            converter = new Date(str[0]);
+            
+//            long itemLong = (long) (Double.parseDouble(str[0]));
+//            converter = new Date(itemLong);
+                       
+            DateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.S", Locale.ENGLISH);
+            converter = format.parse(str[0]);
+            
+//            converter = new Date(str[0]);
             new Point(converter, Double.parseDouble(str[1]),Double.parseDouble(str[2]),Double.parseDouble(str[4]), Double.parseDouble(str[3]));
-            SimpleDateFormat sdf = new SimpleDateFormat("DD.MM.yyyy");
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.S");
             System.out.println(sdf.format(converter));
 //             Termin termin = new Termin(Integer.parseInt(str[0]), Integer.parseInt(str[1]), Integer.parseInt(str[2]), str[3], str[4], str[5]);
 //             termine.add(termin);

@@ -46,6 +46,8 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.net.ftp.FTPClient;
@@ -245,8 +247,8 @@ public class GpsdTestApp {
 
                 dba.setSpeed(tpv.getSpeed());
                 updateing = dba.getUpdateing();
-                System.out.println("tpv.getSpeed(): "+tpv.getSpeed()+" false: "+false);
-                //dba.upload_to_Database();
+                System.out.println("tpv.getSpeed(): "+tpv.getSpeed()+" false: "+updateing);
+
                 if (tpv.getSpeed() <= 100 && updateing == false) {
                     System.out.println("hallo");
                     dba.upload_to_Database();
@@ -297,7 +299,10 @@ public class GpsdTestApp {
       System.out.println("Datei existiert!!!!!!!!");
       FileOutputStream fos = null;
         FileWriter fw = new FileWriter(file, true);
-        fw.write(timestamp + ";" + latitude + ";" + longitude + ";" + speed + ";" + drivenKM+ System.getProperty("line.separator"));
+        Date date = new Date();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.S");
+                System.out.println(sdf.format(date));
+        fw.write(sdf.format(date) + ";" + latitude + ";" + longitude + ";" + speed + ";" + drivenKM+ System.getProperty("line.separator"));
         fw.close();
     } else {
       try {
