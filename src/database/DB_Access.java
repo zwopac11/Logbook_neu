@@ -5,6 +5,7 @@
  */
 package database;
 
+import beans.Point;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -13,6 +14,7 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;
+import java.util.Date;
 import java.util.LinkedList;
 
 /**
@@ -53,8 +55,10 @@ public class DB_Access {
         connPool.relaseConnection(conn);
     }
 
+    // update the points
     public void upload_to_Database() {
         updateing = true;
+        Thread upThread = new Thread("upThread");
         
     }
 
@@ -65,9 +69,13 @@ public class DB_Access {
         FileReader fr = new FileReader(file);
         BufferedReader br = new BufferedReader(fr);
         String zeile = "";
+        Date converter;
 
         while ((zeile = br.readLine()) != null) {
             String[] str = zeile.split(";");
+            converter = new Date(str[0]);
+            new Point(converter, Double.parseDouble(str[1]),Double.parseDouble(str[2]),Double.parseDouble(str[4]), Double.parseDouble(str[3]));
+            
 //             Termin termin = new Termin(Integer.parseInt(str[0]), Integer.parseInt(str[1]), Integer.parseInt(str[2]), str[3], str[4], str[5]);
 //             termine.add(termin);
         }
@@ -84,7 +92,18 @@ public class DB_Access {
 
     public void setDateiname(String dateiname) {
         this.dateiname = dateiname;
-    }
+    }  
  
-    
+  
+}
+
+class upThread extends Thread
+{
+    public void run()
+    {
+        while(true)
+        {
+            
+        }
+    }
 }
