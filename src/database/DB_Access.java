@@ -39,7 +39,7 @@ public class DB_Access {
         return theInstance;
     }
 
-    public void getFilm() throws Exception {
+    public void addPoint() throws Exception {
         Connection conn = connPool.getConnection();
         Statement stat = conn.createStatement();
         String sqlString = "SELECT * "
@@ -49,27 +49,13 @@ public class DB_Access {
 
         System.out.println(rs);
 
-        while (rs.next()) {
-            String title = rs.getString("title");
-            String description = rs.getString("description");
-            String category = rs.getString("category");
-            int length = Integer.parseInt(rs.getString("length"));
-            String actors = rs.getString("actors");
-            double price = Double.parseDouble(rs.getString("price"));
-            //System.out.println(actors);
-            //System.out.println(title+" : "+description+" : "+category+" : "+length+" : "+actors);
-            //Film film = new Film(title, description, category, length, actors,price);
-            //System.out.println(filme.size());
-            //filme.add(film);
-        }
+       
         connPool.relaseConnection(conn);
-
-        //return filme;
     }
 
     public void upload_to_Database() {
         updateing = true;
- 
+        
     }
 
     public void readFile() throws FileNotFoundException, IOException {
