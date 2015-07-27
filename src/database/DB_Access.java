@@ -14,8 +14,11 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.LinkedList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -58,7 +61,12 @@ public class DB_Access {
     // update the points
     public void upload_to_Database() {
         updateing = true;
-        Thread upThread = new Thread("upThread");
+        try {
+            readFile();
+        } catch (IOException ex) {
+            Logger.getLogger(DB_Access.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        //Thread upThread = new Thread("upThread");
         
     }
 
@@ -75,7 +83,8 @@ public class DB_Access {
             String[] str = zeile.split(";");
             converter = new Date(str[0]);
             new Point(converter, Double.parseDouble(str[1]),Double.parseDouble(str[2]),Double.parseDouble(str[4]), Double.parseDouble(str[3]));
-            
+            SimpleDateFormat sdf = new SimpleDateFormat("DD.MM.yyyy");
+            System.out.println(sdf.format(converter));
 //             Termin termin = new Termin(Integer.parseInt(str[0]), Integer.parseInt(str[1]), Integer.parseInt(str[2]), str[3], str[4], str[5]);
 //             termine.add(termin);
         }
