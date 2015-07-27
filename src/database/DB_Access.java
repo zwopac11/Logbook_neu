@@ -27,13 +27,13 @@ import java.util.logging.Logger;
  *
  * @author Paul
  */
-public class DB_Access {
+public class DB_Access extends Thread {
 
     private DB_ConnectionPool connPool;
     //private LinkedList<Film> filme = new LinkedList<>();
     private static DB_Access theInstance = null;
     private double speed;
-    private boolean updateing = false;
+    private boolean updating = false;
     private String dateiname;
 
     private DB_Access() throws ClassNotFoundException {
@@ -57,13 +57,12 @@ public class DB_Access {
 
         System.out.println(rs);
 
-       
         connPool.relaseConnection(conn);
     }
 
     // update the points
     public void upload_to_Database() {
-        updateing = true;
+        updating = true;
         try {
             readFile();
         } catch (IOException ex) {
@@ -72,7 +71,7 @@ public class DB_Access {
             Logger.getLogger(DB_Access.class.getName()).log(Level.SEVERE, null, ex);
         }
         Thread upThread = new Thread("upThread");
-        updateing= false;
+        updating = false;
     }
 
     public void readFile() throws FileNotFoundException, IOException, ParseException {
@@ -86,17 +85,15 @@ public class DB_Access {
 
         while ((zeile = br.readLine()) != null) {
             String[] str = zeile.split(";");
-            
 //            long itemLong = (long) (Double.parseDouble(str[0]));
 //            converter = new Date(itemLong);
-                       
+
             DateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.S", Locale.ENGLISH);
             converter = format.parse(str[0]);
-            
+
 //            converter = new Date(str[0]);
-            new Point(converter, Double.parseDouble(str[1]),Double.parseDouble(str[2]),Double.parseDouble(str[4]), Double.parseDouble(str[3]));
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.S");
-            System.out.println(sdf.format(converter));
+            new Point(converter, Double.parseDouble(str[1]), Double.parseDouble(str[2]), Double.parseDouble(str[4]), Double.parseDouble(str[3]));
+
 //             Termin termin = new Termin(Integer.parseInt(str[0]), Integer.parseInt(str[1]), Integer.parseInt(str[2]), str[3], str[4], str[5]);
 //             termine.add(termin);
         }
@@ -108,23 +105,13 @@ public class DB_Access {
     }
 
     public boolean getUpdateing() {
-        return updateing;
+        return updating;
     }
 
     public void setDateiname(String dateiname) {
         this.dateiname = dateiname;
-    }  
- 
-  
-}
-
-class upThread extends Thread
-{
-    public void run()
-    {
-        while(true)
-        {
-            
-        }
     }
+    
+    
+
 }
