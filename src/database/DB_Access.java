@@ -60,7 +60,7 @@ public class DB_Access {
 
     public void readFile() throws FileNotFoundException, IOException {
 
-        File file = new File(System.getProperty("user.dir")+ File.separator + "termine.svg");//+ File.separator + "src" + File.separator + "data" +
+        File file = new File(dateiname);//+ File.separator + "src" + File.separator + "data" +
 
         FileReader fr = new FileReader(file);
         BufferedReader br = new BufferedReader(fr);
