@@ -246,7 +246,7 @@ public class GpsdTestApp {
                 }
 
                 dba.setSpeed(tpv.getSpeed());
-                updateing = dba.getUpdateing();
+                updateing = dba.getUpdating();
                 System.out.println("tpv.getSpeed(): "+tpv.getSpeed()+" false: "+updateing);
 
                 if (tpv.getSpeed() <= 100 && updateing == false) {
