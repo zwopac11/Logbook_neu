@@ -56,7 +56,7 @@ public class DB_Access extends Thread implements DB_Config{
         Statement stat = conn.createStatement();
         
             String sqlString = "INSERT INTO POINT "
-                + "VALUES (" + pt.getTimestamp()+","+pt.getLongitude()+","+ pt.getLatitude()+","+ pt.getAcceleration()+");";
+                + "VALUES (" + pt.getTimestamp()+","+pt.getCoordinateY()+","+ pt.getCoordinateX()+","+ pt.getAcceleration()+");";
         //String sqlString = "SELECT * FROM books;";
         ResultSet rs = stat.executeQuery(sqlString);
         
@@ -105,7 +105,7 @@ public class DB_Access extends Thread implements DB_Config{
 //             termine.add(termin);
         }
         br.close();
-        track.add(new Point(converter, Double.parseDouble(str[1]), Double.parseDouble(str[2]), Double.parseDouble(str[4]), Double.parseDouble(str[3])));
+//        track.add(new Point(converter, Double.parseDouble(str[1]), Double.parseDouble(str[2]), Double.parseDouble(str[4]), Double.parseDouble(str[3])));
             Thread t = new Thread()
             {
                 public void run()

@@ -17,6 +17,8 @@ package gps;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import beans.Point;
+import beans.Track;
 import java.awt.Color;
 import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
@@ -47,9 +49,14 @@ import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.Persistence;
 import org.apache.commons.net.ftp.FTPClient;
 
 public class GpsdTestApp {
@@ -68,14 +75,35 @@ public class GpsdTestApp {
     private JTextField txtAltitude;
     private JTextField txtSpeed;
 
-    private DB_Access dba;
+//    private DB_Access dba;
     private boolean updateing;
 
     private double latOld = -1, latNew = -1, lonOld = -1, lonNew = -1, d = 0;
+    private LinkedList<Point> points = new LinkedList<>();
+    private EntityManagerFactory emf;
+    private EntityManager em;
 
-    ;
+    public GpsdTestApp() {
+        emf =Persistence.createEntityManagerFactory("GPSPU");
+        em = emf.createEntityManager();
+    }
+    
+    
+    
+    public void begin()
+    {
+        startGpsdClient();
+        
+    }
 
 	public static void main(String[] args) {
+        
+//        EntityManagerFactory emf =Persistence.createEntityManagerFactory("GPSPU");
+//        EntityManager em = emf.createEntityManager();
+        
+            
+        
+            
         Runnable r = new Runnable() {
             public void run() {
                 new GpsdTestApp().createUI();
@@ -99,16 +127,30 @@ public class GpsdTestApp {
     }
 
     private void createUI() {
-
-        try {
-            dba = DB_Access.getInstance();
-
-            // dba.getFilm();
-        } catch (ClassNotFoundException ex) {
-            System.out.println(ex.toString());
-        } catch (Exception ex) {
-            System.out.println(ex.toString());
-        }
+        
+        Point point = new Point(LocalDateTime.now(), 10.1, 10.1, 10.1, 10.1);
+        points.add(point);        
+        
+        Track track = new Track();
+        track.addPoint(point);
+        
+        //System.out.println(point.toString());
+        System.out.println(track.toString());
+        
+        em.getTransaction().begin();
+        em.persist(track);
+        //em.persist(point);
+        em.getTransaction().commit();
+        
+//        try {
+//            dba = DB_Access.getInstance();
+//
+//            // dba.getFilm();
+//        } catch (ClassNotFoundException ex) {
+//            System.out.println(ex.toString());
+//        } catch (Exception ex) {
+//            System.out.println(ex.toString());
+//        }
 
         buildComponents();
         initEventHandling();
@@ -233,26 +275,26 @@ public class GpsdTestApp {
                 d = d + (R * c);
                 //System.out.println(d);
 
-                try {
+//                try {
                     //SimpleDateFormat sdf = new SimpleDateFormat();
                     //String help =Double.parseDouble(tpv.getTimestamp());
                     //sdf.format()
                     System.out.println(tpv.getTimestamp());
-                    writeFile(tpv.getTimestamp(), tpv.getLatitude(), tpv.getLongitude(),tpv.getSpeed(), d);
-                } catch (ParseException ex) {
-                    Logger.getLogger(GpsdTestApp.class.getName()).log(Level.SEVERE, null, ex);
-                } catch (IOException ex) {
-                    Logger.getLogger(GpsdTestApp.class.getName()).log(Level.SEVERE, null, ex);
-                }
-
-                dba.setSpeed(tpv.getSpeed());
-                updateing = dba.getUpdating();
-                System.out.println("tpv.getSpeed(): "+tpv.getSpeed()+" false: "+updateing);
-
-                if (tpv.getSpeed() <= 100 && updateing == false) {
-                    System.out.println("hallo");
-                    dba.upload_to_Database();
-                }
+//                    writeFile(tpv.getTimestamp(), tpv.getLatitude(), tpv.getLongitude(),tpv.getSpeed(), d);
+//                } catch (ParseException ex) {
+//                    Logger.getLogger(GpsdTestApp.class.getName()).log(Level.SEVERE, null, ex);
+//                } catch (IOException ex) {
+//                    Logger.getLogger(GpsdTestApp.class.getName()).log(Level.SEVERE, null, ex);
+//                }
+//
+//                dba.setSpeed(tpv.getSpeed());
+//                updateing = dba.getUpdating();
+//                System.out.println("tpv.getSpeed(): "+tpv.getSpeed()+" false: "+updateing);
+//
+//                if (tpv.getSpeed() <= 100 && updateing == false) {
+//                    System.out.println("hallo");
+//                    dba.upload_to_Database();
+//                }
             }
         });
 
@@ -286,23 +328,23 @@ public class GpsdTestApp {
         fis.close();
     }
 
-    public void writeFile(double timestamp, double latitude, double longitude, double speed, double drivenKM) throws ParseException, IOException {
+    public void writeFile(Point point) throws ParseException, IOException {
         //File file = new File(System.getProperty("user.dir") + File.separator + "src" + File.separator + "data" + File.separator + "save.csv");
         String dateiname = System.getProperty("wohin");
         if (dateiname == null) {
           dateiname = "save.csv";
         }
         File file = new File(dateiname);
-        dba.setDateiname(dateiname);
+//        dba.setDateiname(dateiname);
         
             if (file.exists()) {
       System.out.println("Datei existiert!!!!!!!!");
       FileOutputStream fos = null;
         FileWriter fw = new FileWriter(file, true);
-        Date date = new Date();
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.S");
-                System.out.println(sdf.format(date));
-        fw.write(sdf.format(date) + ";" + latitude + ";" + longitude + ";" + speed + ";" + drivenKM+ System.getProperty("line.separator"));
+//        Date date = new Date();
+//        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.S");
+//                System.out.println(sdf.format(date));
+        fw.write(point.toString()+ System.getProperty("line.separator"));
         fw.close();
     } else {
       try {
@@ -311,7 +353,7 @@ public class GpsdTestApp {
         fos.close();
         
         FileWriter fw = new FileWriter(file, true);
-        fw.write(timestamp + ";" + latitude + ";" + longitude + ";" + drivenKM+ System.getProperty("line.separator"));
+        fw.write(point.toString()+ System.getProperty("line.separator"));
         fw.close();
       } catch (FileNotFoundException e) {
         e.printStackTrace();
