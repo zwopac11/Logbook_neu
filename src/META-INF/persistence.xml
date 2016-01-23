@@ -3,12 +3,13 @@
   <persistence-unit name="GPSPU" transaction-type="RESOURCE_LOCAL">
     <provider>org.hibernate.ejb.HibernatePersistence</provider>
     <properties>
-      <property name="javax.persistence.jdbc.url" value="jdbc:mysql://localhost:3306/test"/>
+      <property name="javax.persistence.jdbc.url" value="jdbc:mysql://localhost:3306/test?autoReconnect=true"/>
       <property name="javax.persistence.jdbc.user" value="root"/>
       <property name="javax.persistence.jdbc.driver" value="com.mysql.jdbc.Driver"/>
       <property name="javax.persistence.jdbc.password" value=""/>
       <property name="hibernate.cache.provider_class" value="org.hibernate.cache.NoCacheProvider"/>
-      <property name="javax.persistence.schema-generation.database.action" value="drop-and-create"/>
+      <property name="hibernate.connection.autoReconnect" value="true"/>
+      <property name="hibernate.connection.autoReconnectForPools" value="true"/>
     </properties>
   </persistence-unit>
 </persistence>

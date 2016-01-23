@@ -14,7 +14,7 @@ import javax.persistence.Converter;
 
 /**
  *
- * @author Paul
+ * @author paulz
  */
 @Converter(autoApply=true)
 public class LocalDateTimeConverter implements AttributeConverter<LocalDateTime, Timestamp>{
@@ -29,8 +29,4 @@ public class LocalDateTimeConverter implements AttributeConverter<LocalDateTime,
         return dbData.toLocalDateTime();
     }
 
-
-
-
-    
 }

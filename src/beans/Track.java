@@ -7,33 +7,55 @@ package beans;
 
 import java.time.LocalDateTime;
 import java.util.LinkedHashSet;
+import java.util.Objects;
 import java.util.Set;
-import javax.persistence.CascadeType;
+import java.util.UUID;
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.IdClass;
 import javax.persistence.OneToMany;
+import org.hibernate.annotations.NotFound;
+import org.hibernate.annotations.NotFoundAction;
 
 /**
  *
  * @author paulz
  */
 @Entity
+@IdClass(TrackId.class)
 public class Track {
     
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private int id;
-    private LocalDateTime trackID;
+    private String id;
+    private LocalDateTime timestamp;
+    @Id
     private int serialNumber;
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "track")
+    @NotFound(action = NotFoundAction.IGNORE)
+    @OneToMany( mappedBy = "track")
     private Set<Point> points = new LinkedHashSet<>();
 
-//    public Track(LocalDateTime trackID) {
-//        this.trackID = trackID;
-//    }
 
+    public Track() {
+    }
+
+    public Track(LocalDateTime timestamp, int serialNumber) {
+        this.id = UUID.randomUUID().toString();
+        this.timestamp = timestamp;
+        this.serialNumber = serialNumber;
+    }
+
+    public Track(String id, LocalDateTime timestamp, int serialNumber) {
+        this.id = id;
+        this.timestamp = timestamp;
+        this.serialNumber = serialNumber;
+    }
+    
+
+    public String getId() {
+        return id;
+    }
+    
+    
 
     public int getSerialNumber() {
         return serialNumber;
@@ -44,23 +66,47 @@ public class Track {
     }
 
     public LocalDateTime getTrackID() {
-        return trackID;
+        return timestamp;
     }
 
-    
-    
-    
-    
-    public void addPoint(Point point)
-    {
-        point.setTrack(this);
-        //point.setTrackID(this);
-        points.add(point);
-    } 
+    public Set<Point> getPoints() {
+        return points;
+    }
+
+    public void setPoints(Set<Point> points) {
+        this.points = points;
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final Track other = (Track) obj;
+        if (!Objects.equals(this.id, other.id)) {
+            return false;
+        }
+        if (!Objects.equals(this.timestamp, other.timestamp)) {
+            return false;
+        }
+        if (this.serialNumber != other.serialNumber) {
+            return false;
+        }
+        return true;
+    }
 
     @Override
     public String toString() {
-        return id + ";" +trackID + ";" + serialNumber + ";" + points;
+        return id + ";" +timestamp + ";" + serialNumber;// + ";" + points
     }
     
     

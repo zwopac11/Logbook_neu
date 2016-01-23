@@ -1,22 +1,8 @@
 package gps;
 
-/*
- * Java gpsd TestApp
- * 
- * Copyright (C) 2014 Marcus Hottenrott - www.it-adviser.net
- * 
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+
+import beans.BL;
+import beans.DataManager;
 import beans.Point;
 import beans.Track;
 import java.awt.Color;
@@ -50,6 +36,7 @@ import java.io.FileWriter;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.logging.Level;
@@ -74,47 +61,24 @@ public class GpsdTestApp {
     private JTextField txtLongitude;
     private JTextField txtAltitude;
     private JTextField txtSpeed;
-
-//    private DB_Access dba;
-    private boolean updateing;
-
-    private double latOld = -1, latNew = -1, lonOld = -1, lonNew = -1, d = 0;
-    private LinkedList<Point> points = new LinkedList<>();
-    private EntityManagerFactory emf;
-    private EntityManager em;
+    private BL bl;
 
     public GpsdTestApp() {
-        emf =Persistence.createEntityManagerFactory("GPSPU");
-        em = emf.createEntityManager();
-    }
-    
-    
-    
-    public void begin()
-    {
-        startGpsdClient();
-        
+        bl = new BL();
     }
 
-	public static void main(String[] args) {
-        
-//        EntityManagerFactory emf =Persistence.createEntityManagerFactory("GPSPU");
-//        EntityManager em = emf.createEntityManager();
-        
-            
-        
-            
-        Runnable r = new Runnable() {
-            public void run() {
-                new GpsdTestApp().createUI();
-            }
-        };
-        EventQueue.invokeLater(r);
+
+    
+    
+
+    public void begin() {
+        startGpsdClient();
+
     }
 
     private void buildComponents() {
         txtServerAdress = new JTextField();
-        txtServerAdress.setText("192.168.178.44");//192.168.1.107 //127.0.0.1
+        txtServerAdress.setText("192.168.178.44");//192.168.1.107 //127.0.0.1//192.168.43.69
         txtServerPort = new JTextField();
         txtServerPort.setText("2947");
         txtLatitude = new JTextField();
@@ -127,36 +91,10 @@ public class GpsdTestApp {
     }
 
     private void createUI() {
-        
-        Point point = new Point(LocalDateTime.now(), 10.1, 10.1, 10.1, 10.1);
-        points.add(point);        
-        
-        Track track = new Track();
-        track.addPoint(point);
-        
-        //System.out.println(point.toString());
-        System.out.println(track.toString());
-        
-        em.getTransaction().begin();
-        em.persist(track);
-        //em.persist(point);
-        em.getTransaction().commit();
-        
-//        try {
-//            dba = DB_Access.getInstance();
-//
-//            // dba.getFilm();
-//        } catch (ClassNotFoundException ex) {
-//            System.out.println(ex.toString());
-//        } catch (Exception ex) {
-//            System.out.println(ex.toString());
-//        }
-
         buildComponents();
         initEventHandling();
 
         frame = new JFrame();
-        frame.setTitle("Java gpsd Testclient - www.it-adviser.net");
 
         //formatter:off
         FormLayout formLayout = new FormLayout("f:p, $lcgap, 60dlu, $lcgap, 60dlu",
@@ -184,7 +122,7 @@ public class GpsdTestApp {
         builder.addLabel("Speed (m/s):", CC.xy(1, 15));
         builder.add(txtSpeed, CC.xy(3, 15));
 
-		//formatter:on		
+        //formatter:on		
         builder.background(Color.white);
         builder.border(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
@@ -231,70 +169,12 @@ public class GpsdTestApp {
                 txtLongitude.setText(String.valueOf(tpv.getLongitude()));
                 txtAltitude.setText(String.valueOf(tpv.getAltitude()));
                 txtSpeed.setText(String.valueOf(tpv.getSpeed()));
-
-                if (latOld == -1 && lonOld == -1) {
-                    latNew = tpv.getLatitude();
-                    lonNew = tpv.getLongitude();
-                }
-                latOld = latNew;
-                lonOld = lonNew;
-                latNew = tpv.getLatitude();
-                lonNew = tpv.getLongitude();
-
-                //System.out.println(tpv.getTimestamp() + "afadfasdfasLongitude: " + tpv.getLatitude() + "Latitude: " + tpv.getLongitude());
-
-////                            //upload auf Fileservver    
-////                            try {
-////                                String filename = "daten.txt";
-////                                upload(filename);
-////                            } catch (IOException ex) {
-////                                Logger.getLogger(GpsdTestApp.class.getName()).log(Level.SEVERE, null, ex);
-////                            }
-////                                //interpolation
-//////?                                double R = 6371000; // metres
-//////                                double ?1 = Math.toRadians(latOld);
-//////                                double ?2 = Math.toRadians(latNew);
-//////                                double ?? = (latNew-latOld)* Math.PI / 180;
-//////                                double ?? = (lonNew-lonOld)* Math.PI / 180;
-//////
-//////                                double a = Math.sin(??/2) * Math.sin(??/2) +
-//////                                        Math.cos(?1) * Math.cos(?2) *
-//////                                        Math.sin(??/2) * Math.sin(??/2);
-//////                                double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-//////
-//////?                                double d = R * c;
-////                                
-                double R = 6371000; // metres
-
-                double dLat = Math.toRadians(latNew - latOld);
-                double dLon = Math.toRadians(lonNew - lonOld);
-                double a = Math.sin(dLat / 2) * Math.sin(dLat / 2)
-                        + Math.cos(Math.toRadians(latOld)) * Math.cos(Math.toRadians(latNew))
-                        * Math.sin(dLon / 2) * Math.sin(dLon / 2);
-                double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-                d = d + (R * c);
-                //System.out.println(d);
-
-//                try {
-                    //SimpleDateFormat sdf = new SimpleDateFormat();
-                    //String help =Double.parseDouble(tpv.getTimestamp());
-                    //sdf.format()
-                    System.out.println(tpv.getTimestamp());
-//                    writeFile(tpv.getTimestamp(), tpv.getLatitude(), tpv.getLongitude(),tpv.getSpeed(), d);
-//                } catch (ParseException ex) {
-//                    Logger.getLogger(GpsdTestApp.class.getName()).log(Level.SEVERE, null, ex);
-//                } catch (IOException ex) {
-//                    Logger.getLogger(GpsdTestApp.class.getName()).log(Level.SEVERE, null, ex);
-//                }
-//
-//                dba.setSpeed(tpv.getSpeed());
-//                updateing = dba.getUpdating();
-//                System.out.println("tpv.getSpeed(): "+tpv.getSpeed()+" false: "+updateing);
-//
-//                if (tpv.getSpeed() <= 100 && updateing == false) {
-//                    System.out.println("hallo");
-//                    dba.upload_to_Database();
-//                }
+                
+                /**
+                 * Aufruf von BL
+                 */
+                bl.test(tpv);
+                
             }
         });
 
@@ -307,67 +187,6 @@ public class GpsdTestApp {
             showError(e.getMessage());
             e.printStackTrace();
         }
-    }
-
-    /**
-     * Upload FTP Server
-     *
-     * @param filename
-     * @throws IOException
-     */
-    public void upload(String filename) throws IOException {
-        FTPClient client = new FTPClient();
-        FileInputStream fis = null;
-
-        client.connect("ftp.sunlime.at", 990);
-        client.login("admin", "secret");
-
-        fis = new FileInputStream(filename);
-        client.storeFile(filename, fis);
-        client.logout();
-        fis.close();
-    }
-
-    public void writeFile(Point point) throws ParseException, IOException {
-        //File file = new File(System.getProperty("user.dir") + File.separator + "src" + File.separator + "data" + File.separator + "save.csv");
-        String dateiname = System.getProperty("wohin");
-        if (dateiname == null) {
-          dateiname = "save.csv";
-        }
-        File file = new File(dateiname);
-//        dba.setDateiname(dateiname);
-        
-            if (file.exists()) {
-      System.out.println("Datei existiert!!!!!!!!");
-      FileOutputStream fos = null;
-        FileWriter fw = new FileWriter(file, true);
-//        Date date = new Date();
-//        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.S");
-//                System.out.println(sdf.format(date));
-        fw.write(point.toString()+ System.getProperty("line.separator"));
-        fw.close();
-    } else {
-      try {
-        FileOutputStream fos = new FileOutputStream(file);
-        fos.write("".getBytes());
-        fos.close();
-        
-        FileWriter fw = new FileWriter(file, true);
-        fw.write(point.toString()+ System.getProperty("line.separator"));
-        fw.close();
-      } catch (FileNotFoundException e) {
-        e.printStackTrace();
-      } catch (IOException e) {
-        e.printStackTrace();
-      }
-
-    }
-
-        
-//        FileOutputStream fos = null;
-//        FileWriter fw = new FileWriter(file, true);
-//        fw.write(timestamp + ";" + latitude + ";" + longitude + ";" + drivenKM+"\n");
-//        fw.close();
     }
 
     private void stopGpsdClient() {
@@ -383,4 +202,16 @@ public class GpsdTestApp {
                 "Error:",
                 JOptionPane.ERROR_MESSAGE);
     }
+
+    
+    
+//    public static void main(String[] args) {
+//        Runnable r = new Runnable() {
+//            public void run() {
+//
+//                new GpsdTestApp().createUI();
+//            }
+//        };
+//        EventQueue.invokeLater(r);
+//    }
 }
