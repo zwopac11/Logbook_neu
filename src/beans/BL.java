@@ -67,24 +67,6 @@ public class BL {
 
         data_manager = new DataManager();
         
-        
-//        try {
-//            data_manager.readOfflineData();
-//            BlockingQueue<Point> points_offline = data_manager.getPoints_offline();
-//            BlockingQueue<Track> tracks_offline = data_manager.getTracks_offline();
-//            for (Track track_offline : tracks_offline) {
-//                tracks.put(track_offline);
-//            }
-//            for (Point point_offline : points_offline) {
-//                points.put(point_offline);
-//            }
-//        } catch (IOException ex) {
-//            Logger.getLogger(BL.class.getName()).log(Level.SEVERE, null, ex);
-//        } catch (ParseException ex) {
-//            Logger.getLogger(BL.class.getName()).log(Level.SEVERE, null, ex);
-//        } catch (InterruptedException ex) {
-//            Logger.getLogger(BL.class.getName()).log(Level.SEVERE, null, ex);
-//        }
         track = new Track(LocalDateTime.now(), 1234);
         tracks.add(track);
         

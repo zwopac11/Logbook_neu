@@ -84,8 +84,6 @@ public class DataManager {
         return tracks_offline;
     }
 
-
-    
     
     public void writeFile(BlockingQueue<Point> points) throws ParseException, IOException {
         File file = new File(filepath);
@@ -132,13 +130,11 @@ public class DataManager {
         //Maximale 
         
         for (Point point : points) {
-                em.merge(point); //zu testen
+                em.merge(point); 
                 em.flush();
                 removePoints.add(point);
         }
-        
 
-        
         em.getTransaction().commit();
         return removePoints;
     }
