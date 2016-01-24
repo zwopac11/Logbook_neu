@@ -165,7 +165,7 @@ public class gps_gui extends JFrame
     private JLabel lbServerAddress = new JLabel("gpsd-Server IP: ");
     private JLabel lbServerPort = new JLabel("gpsd-ServerPort: ");
 
-    private JTextField tfServerAddress = new JTextField("192.168.178.44");
+    private JTextField tfServerAddress = new JTextField("127.0.0.1");//192.168.178.44
     private JTextField tfServerPort = new JTextField("2947");
 
     private JButton btConnect = new JButton("Connect");
