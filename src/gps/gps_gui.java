@@ -11,7 +11,6 @@ import gps.pgsd4java.backend.GPSdEndpoint;
 import gps.pgsd4java.backend.ResultParser;
 import gps.pgsd4java.types.TPVObject;
 import java.awt.Container;
-import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.awt.HeadlessException;
 import java.awt.event.ActionEvent;
@@ -21,7 +20,6 @@ import java.net.UnknownHostException;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.border.TitledBorder;
@@ -42,8 +40,8 @@ public class gps_gui extends JFrame
         this.setLocationRelativeTo(null);
         this.setSize(750, 525);
         bl = new BL();
-        //startGpsdClient();
-        initComponents();
+        startGpsdClient();
+        //initComponents();
         
     }
     
@@ -156,7 +154,61 @@ public class gps_gui extends JFrame
 
     public static void main(String[] args) 
     {
-        new gps_gui().setVisible(true);
+//        JPoint p1 = new JPoint("trackid", 33333, 1234, "uuidddd3", 123, 1.0, 2.0, 3.0, 4.0);
+//        JPoint p2 = new JPoint("trackid", 33333, 1234, "uuidddd4", 123, 1.0, 2.0, 3.0, 4.0);
+//        JContainer container = new JContainer(1234, "sowas von geheim22");
+//        container.getPoints().add(p1);
+//        container.getPoints().add(p2);
+//        
+//        String json = new Gson().toJson(container);
+//        
+//        try {
+//            URL url = new URL("http://localhost/gps.php");//logbook.main.sunlime.at
+//            HttpURLConnection con = (HttpURLConnection) url.openConnection();
+//            
+//            
+//            //add reuqest header
+//            con.setRequestMethod("POST");
+//            con.setRequestProperty("User-Agent", "Raspi-0815");
+//            con.setRequestProperty("Accept-Language", "en-US");
+//
+//            
+//            //TODO
+//            //Limit of uploded points
+//            
+//            // Send post request
+//            con.setDoOutput(true);
+//            OutputStream output_stream = con.getOutputStream();
+//            byte[] json_bytes = json.getBytes("UTF-8");
+//            output_stream.write(json_bytes);
+//            output_stream.flush();
+//            output_stream.close();
+//
+//            int responseCode = con.getResponseCode();
+//            System.out.println("\nSending 'POST' request to URL : " + url);
+//            System.out.println("Response Code : " + responseCode);
+//
+//            BufferedReader in = new BufferedReader(
+//            new InputStreamReader(con.getInputStream()));
+//            String inputLine;
+//            StringBuffer response = new StringBuffer();
+//
+//            while ((inputLine = in.readLine()) != null) {
+//                    response.append(inputLine);
+//            }
+//            in.close();
+//            
+//            System.out.println("Response:\n" + response.toString());
+//
+//            
+//        } catch (MalformedURLException ex) {
+//            Logger.getLogger(gps_gui.class.getName()).log(Level.SEVERE, null, ex);
+//        } catch (IOException ex) {
+//            Logger.getLogger(gps_gui.class.getName()).log(Level.SEVERE, null, ex);
+//        }
+//        
+//        System.out.println(json);
+         new gps_gui();//.setVisible(true);
     }
 
     private JPanel pnTop = new JPanel();
@@ -165,7 +217,7 @@ public class gps_gui extends JFrame
     private JLabel lbServerAddress = new JLabel("gpsd-Server IP: ");
     private JLabel lbServerPort = new JLabel("gpsd-ServerPort: ");
 
-    private JTextField tfServerAddress = new JTextField("192.168.178.44");//192.168.178.44
+    private JTextField tfServerAddress = new JTextField("127.0.0.1");//192.168.178.44
     private JTextField tfServerPort = new JTextField("2947");
 
     private JButton btConnect = new JButton("Connect");

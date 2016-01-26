@@ -5,29 +5,18 @@
  */
 package beans;
 
-import gps.GpsdTestApp;
 import gps.pgsd4java.types.TPVObject;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.text.ParseException;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
-import java.util.LinkedList;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.Persistence;
-import javax.persistence.PersistenceException;
 import org.apache.commons.net.ftp.FTPClient;
-import org.hibernate.HibernateException;
-import org.hibernate.JDBCException;
-import org.hibernate.exception.GenericJDBCException;
-import org.hibernate.exception.JDBCConnectionException;
-import com.mysql.jdbc.log.StandardLogger;
+import java.util.UUID;
+import json.JContainer;
+import json.JPoint;
 
 /**
  *
@@ -37,14 +26,10 @@ public class BL {
 
 
     private boolean updateing;
+    //private Logger
     private static final Logger LOGGER = Logger.getLogger(BL.class.getName());
     private double latOld = -1, latNew = -1, lonOld = -1, lonNew = -1, d = 0;
-    private BlockingQueue<Point> points = new LinkedBlockingQueue<>();
-    private BlockingQueue<Track> tracks = new LinkedBlockingQueue<>();
-    private EntityManagerFactory emf;
-    private EntityManager em;
     private DataManager data_manager;
-    private Track track;
     private saveThread saveThread;
 
     
@@ -52,23 +37,18 @@ public class BL {
     private boolean reconnectWithoutEMF=false;
     private boolean loadDataOffline=true;
     
-    private StandardLogger logger_mysql = new StandardLogger("test");
+    private int serialNumber =1234;
+    private String trackId;
+    private long trackTimestamp;
+    private JContainer container;
     
     public BL() {
-        try {
-            emf = Persistence.createEntityManagerFactory("GPSPU");
-            em = emf.createEntityManager();
-        } catch (PersistenceException ex) {
-            System.out.println("PersistenceEx +-+-+-+-+-+-+-+-+-+");
-            LOGGER.log(Level.WARNING,"Fehler ",ex);
-            System.out.println(ex.toString());
-            reconnecting = true;
-        }
+        trackId = UUID.randomUUID().toString();
+        trackTimestamp = System.currentTimeMillis();
+        container = new JContainer(serialNumber, "sowas von geheim22");
 
         data_manager = new DataManager();
         
-        track = new Track(LocalDateTime.now(), 1234);
-        tracks.add(track);
         
         saveThread = new saveThread();
         saveThread.start();
@@ -114,31 +94,23 @@ public class BL {
             d = d + (R * c);
             System.out.println("Distance:"+d +"Speed:"+tpv.getSpeed());
         }
-        Point point = new Point(LocalDateTime.now(), tpv.getLatitude(), tpv.getLongitude(), d, tpv.getSpeed(), track);
 
+        JPoint jpoint = new JPoint(trackId, trackTimestamp, serialNumber, UUID.randomUUID().toString(), System.currentTimeMillis(), tpv.getLatitude(), tpv.getLongitude(), d, tpv.getSpeed());
         
 
         try {
-            points.put(point);
+            container.getPoints().put(jpoint);
         } catch (InterruptedException ex) {
             Logger.getLogger(BL.class.getName()).log(Level.SEVERE, null, ex);
         }
             
             try {
-                System.out.println("points size:"+points.size());
-                System.out.println("traks size:"+tracks.size());
-                for (Track track1 : tracks) {
-                    System.out.println("track: "+track1.getId());
-                }
-                data_manager.writeFile(points);
+                data_manager.writeFile(container.getPoints());
             } catch (ParseException ex) {
                 Logger.getLogger(BL.class.getName()).log(Level.SEVERE, null, ex);
             } catch (IOException ex) {
                 Logger.getLogger(BL.class.getName()).log(Level.SEVERE, null, ex);
             }
-
-        
-        
 
     }
 
@@ -148,7 +120,8 @@ public class BL {
      * @param filename
      * @throws IOException
      */
-    public void upload(String filename) throws IOException {
+    public void upload(String filename) throws IOException 
+    {
         FTPClient client = new FTPClient();
         FileInputStream fis = null;
 
@@ -161,12 +134,17 @@ public class BL {
         fis.close();
     }
 
-    class saveThread extends Thread {
+    class saveThread extends Thread 
+    {
 
         @Override
         public void run() {
             System.out.println("-------------------------Thread gestartet-----------------------------------");
             synchronized (this) {
+                if(loadDataOffline)
+                {
+                  loadOfflineDataInList();
+                }
                 while (!Thread.currentThread().isInterrupted()) {
                     processData();
                     try {
@@ -192,17 +170,10 @@ public class BL {
     {
         try {
                 data_manager.readOfflineData();
-                BlockingQueue<Point> points_offline = data_manager.getPoints_offline();
-                BlockingQueue<Track> tracks_offline = data_manager.getTracks_offline();
-                for (Track track_offline : tracks_offline) {
-                    if(!tracks.contains(track_offline))
-                    {
-                        tracks.put(track_offline);
-                    }
-                    
-                }
-                for (Point point_offline : points_offline) {
-                    points.put(point_offline);
+                BlockingQueue<JPoint> points_offline = data_manager.getPoints_offline();
+                
+                for (JPoint point_offline : points_offline) {
+                    container.getPoints().put(point_offline);
                 }
               loadDataOffline=false;
             } catch (IOException ex) {
@@ -214,58 +185,16 @@ public class BL {
             }
     }
     
-    public void processData() {
-        if(loadDataOffline)
-        {
-          loadOfflineDataInList();
-          
-        }
-        if (reconnecting) {
-            do {
-                try {
-                    emf = Persistence.createEntityManagerFactory("GPSPU");
-                    em = emf.createEntityManager();
-                    reconnecting = false;
-                } catch (PersistenceException ex) {
-                    
-                    System.out.println("PersistenceEx +-+-+-+-+-+-+-+-+-+");
-                    System.out.println(ex.toString());
-                    reconnecting = true;
-                }
-
-            } while (reconnecting);
-            System.out.println("EMF started****************************");
-        }
-        if (reconnectWithoutEMF) {
-            do {
-                try {
-                    System.out.println("reconnect");
-                    em = emf.createEntityManager();
-                    reconnectWithoutEMF = false;
-                } catch (PersistenceException ex) {
-                    
-                    System.out.println("PersistenceEx +-+-+-+-+-+-+-+-+-+");
-                    System.out.println(ex.toString());
-                    LOGGER.log(Level.WARNING, "Reconect Exc", ex);
-                    reconnectWithoutEMF = true;
-                }
-
-            } while (reconnectWithoutEMF);
-            System.out.println("EMF started****************************");
-        }
+    public void processData() 
+    {
         try {
-            BlockingQueue<Track> removeTracks = new LinkedBlockingQueue<>();
-            removeTracks = data_manager.uploadTracks(em, tracks);
-            for (Track removeTrack : removeTracks) {
-                tracks.remove(removeTrack);
-            }
-            BlockingQueue<Point> removePoints = new LinkedBlockingQueue<>();
-            removePoints = data_manager.uploadPoints(em, points);
-            for (Point removePoint : removePoints) {
-                points.remove(removePoint);
+           
+            BlockingQueue<JPoint> removePoints = new LinkedBlockingQueue<>();
+            removePoints = data_manager.uploadContainer(container);
+            for (JPoint removePoint : removePoints) {
+                container.getPoints().remove(removePoint);
             }
         } catch (Exception ex) {
-            reconnectWithoutEMF = true;
             
             System.out.println("Starting to reconnect..........");
             System.out.println(ex.toString());

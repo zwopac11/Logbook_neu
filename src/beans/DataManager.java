@@ -5,6 +5,7 @@
  */
 package beans;
 
+import com.google.gson.Gson;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -12,25 +13,17 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.text.DateFormat;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.time.LocalDateTime;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.LinkedList;
-import java.util.Locale;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.Persistence;
-import javax.persistence.Query;
-import javax.persistence.TypedQuery;
-import org.hibernate.HibernateException;
-import org.hibernate.JDBCException;
-import org.hibernate.exception.JDBCConnectionException;
-import org.hibernate.jpa.boot.spi.EntityManagerFactoryBuilder;
+import json.JContainer;
+import json.JPoint;
 
 /**
  *
@@ -38,9 +31,9 @@ import org.hibernate.jpa.boot.spi.EntityManagerFactoryBuilder;
  */
 public class DataManager {
 
-    private BlockingQueue<Point> points_offline = new LinkedBlockingQueue<>();
-    private BlockingQueue<Track> tracks_offline = new LinkedBlockingQueue<>();
+    private BlockingQueue<JPoint> points_offline = new LinkedBlockingQueue<>();
     private String filepath = System.getProperty("user.dir") + File.separator + "save.csv";
+    private String url_string = "http://192.168.178.43/gps.php";//logbook.main.sunlime.at
 
     public void readOfflineData() throws FileNotFoundException, IOException, ParseException {
         File file = new File(filepath);
@@ -63,29 +56,22 @@ public class DataManager {
             while ((zeile = br.readLine()) != null) {
                 str = zeile.split(";");      
                 
-                 
-                Track tr = new Track(str[0], LocalDateTime.parse(str[1]), Integer.parseInt(str[2]));
-                Point p = new Point(str[3].replace("[", ""),LocalDateTime.parse(str[4]), Double.parseDouble(str[5]), Double.parseDouble(str[6]), 
-                        Double.parseDouble(str[7]), Double.parseDouble(str[8].replace("]", "")),tr);
-
-                points_offline.add(p);
-                tracks_offline.add(tr);
+                JPoint point = new JPoint(str[0], Long.parseLong(str[1]), Integer.parseInt(str[2]), str[3].replace("[", ""),Long.parseLong(str[4]), Double.parseDouble(str[5]), Double.parseDouble(str[6]), 
+                        Double.parseDouble(str[7]), Double.parseDouble(str[8].replace("]", "")));
+                points_offline.add(point);
             }
             br.close();
 
         }
     }
 
-    public BlockingQueue<Point> getPoints_offline() {
+    public BlockingQueue<JPoint> getPoints_offline() {
         return points_offline;
     }
 
-    public BlockingQueue<Track> getTracks_offline() {
-        return tracks_offline;
-    }
-
     
-    public void writeFile(BlockingQueue<Point> points) throws ParseException, IOException {
+    
+    public void writeFile(BlockingQueue<JPoint> points) throws ParseException, IOException {
         File file = new File(filepath);
         
             try {
@@ -93,7 +79,7 @@ public class DataManager {
                 fos.write("".getBytes());
                 fos.close();
                 
-                for (Point point : points) {
+                for (JPoint point : points) {
                 
                         FileWriter fw = new FileWriter(file, true);
                         fw.write(point.toString() + System.getProperty("line.separator"));
@@ -107,35 +93,53 @@ public class DataManager {
            
     }
 
-    public BlockingQueue<Track> uploadTracks(EntityManager em, BlockingQueue<Track> tracks) throws Exception{
-        BlockingQueue<Track> removeTracks = new LinkedBlockingQueue<>();
-        em.getTransaction().begin();
-        for (Track track : tracks) {
+    
+        public BlockingQueue<JPoint> uploadContainer(JContainer container) throws Exception{
 
-                em.merge(track);
-                em.flush();
-
-        }
-        
-        em.getTransaction().commit();
-        return removeTracks;
-    }
-
-    public BlockingQueue<Point> uploadPoints(EntityManager em, BlockingQueue<Point> points) throws Exception{
-
-        BlockingQueue<Point> removePoints = new LinkedBlockingQueue<>();
-        em.getTransaction().begin();
+            BlockingQueue<JPoint> removePoints = new LinkedBlockingQueue<>();
         
         //TODO
-        //Maximale 
-        
-        for (Point point : points) {
-                em.merge(point); 
-                em.flush();
+        //Limit of uploded points
+            
+        for (JPoint point : container.getPoints()) {
+ 
                 removePoints.add(point);
         }
+        String json = new Gson().toJson(container);
+        URL url = new URL(url_string);
+            HttpURLConnection con = (HttpURLConnection) url.openConnection();
+            
+            
+            //add reuqest header
+            con.setRequestMethod("POST");
+            con.setRequestProperty("User-Agent", "Raspi-0815");
+            con.setRequestProperty("Accept-Language", "en-US");
 
-        em.getTransaction().commit();
+            
+            // Send post request
+            con.setDoOutput(true);
+            OutputStream output_stream = con.getOutputStream();
+            byte[] json_bytes = json.getBytes("UTF-8");
+            output_stream.write(json_bytes);
+            output_stream.flush();
+            output_stream.close();
+
+            int responseCode = con.getResponseCode();
+            System.out.println("\nSending 'POST' request to URL : " + url);
+            System.out.println("Response Code : " + responseCode);
+
+            BufferedReader in = new BufferedReader(
+            new InputStreamReader(con.getInputStream()));
+            String inputLine;
+            StringBuffer response = new StringBuffer();
+
+            while ((inputLine = in.readLine()) != null) {
+                    response.append(inputLine);
+            }
+            in.close();
+            
+            System.out.println("Response:\n" + response.toString());
+        
         return removePoints;
     }
 }
